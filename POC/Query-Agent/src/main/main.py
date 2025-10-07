@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Request, Query, HTTPException, Response
 from settings import WHATSAPP_TOKEN, PHONE_NUMBER_ID, GOOGLE_API_KEY
 from src.agents.retriver_agent import create_query_agent
+from src.agents.multi_agent_guardrails import workflow
 import httpx
 
 VERIFICATION_TOKEN = "my_super_secret_token_987"
 
-query_agent = create_query_agent(api_key=GOOGLE_API_KEY)
+# query_agent = create_query_agent(api_key=GOOGLE_API_KEY)
 
 app = FastAPI()
 
@@ -70,8 +71,14 @@ async def receive_whatsapp(request: Request):
 
     # Call your AI agent
     try:
-        result = query_agent.invoke({"input": text})
-        answer = result["output"] if isinstance(result, dict) else str(result)
+        initial_state = {
+            "user_query": text,
+            "query_response": "",
+            "evaluation_state": ""
+        }
+        final_state = workflow.invoke(initial_state, config={"verbose": True})
+        print(final_state)
+        answer = final_state["query_response"]
     except Exception as e:
         print("Agent error:", e)
         answer = "⚠️ Oops, something went wrong. Please try again."

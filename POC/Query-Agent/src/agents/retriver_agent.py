@@ -13,7 +13,7 @@ def create_query_agent(
     llm = ChatGoogleGenerativeAI(
         model=model,
         temperature=temperature,
-        google_api_key=api_key
+        google_api_key=api_key,
     )
     tools = [get_context]
     prompts = load_prompts(prompt_path)
