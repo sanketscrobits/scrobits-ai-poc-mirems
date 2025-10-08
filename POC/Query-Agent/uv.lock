@@ -1100,6 +1100,20 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain-huggingface"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "huggingface-hub" },
+    { name = "langchain-core" },
+    { name = "tokenizers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3f/15/f832ae485707bf52f9a8f055db389850de06c46bc6e3e4420a0ef105fbbf/langchain_huggingface-0.3.1.tar.gz", hash = "sha256:0a145534ce65b5a723c8562c456100a92513bbbf212e6d8c93fdbae174b41341", size = 25154, upload-time = "2025-07-22T17:22:26.77Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/26/7c5d4b4d3e1a7385863acc49fb6f96c55ccf941a750991d18e3f6a69a14a/langchain_huggingface-0.3.1-py3-none-any.whl", hash = "sha256:de10a692dc812885696fbaab607d28ac86b833b0f305bccd5d82d60336b07b7d", size = 27609, upload-time = "2025-07-22T17:22:25.282Z" },
+]
+
+[[package]]
 name = "langchain-text-splitters"
 version = "0.3.11"
 source = { registry = "https://pypi.org/simple" }
@@ -2710,6 +2724,7 @@ dependencies = [
     { name = "langchain-core" },
     { name = "langchain-experimental" },
     { name = "langchain-google-genai" },
+    { name = "langchain-huggingface" },
     { name = "langgraph" },
     { name = "langgraph-supervisor" },
     { name = "llama-index" },
@@ -2737,6 +2752,7 @@ requires-dist = [
     { name = "langchain-core", specifier = ">=0.3.75" },
     { name = "langchain-experimental", specifier = ">=0.3.4" },
     { name = "langchain-google-genai", specifier = ">=2.1.10" },
+    { name = "langchain-huggingface", specifier = ">=0.3.1" },
     { name = "langgraph", specifier = ">=0.6.6" },
     { name = "langgraph-supervisor", specifier = ">=0.0.29" },
     { name = "llama-index", specifier = ">=0.14.0" },

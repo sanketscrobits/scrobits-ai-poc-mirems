@@ -3,6 +3,7 @@ from settings import WHATSAPP_TOKEN, PHONE_NUMBER_ID, GOOGLE_API_KEY
 from src.agents.retriver_agent import create_query_agent
 from src.agents.multi_agent_guardrails import workflow
 import httpx
+import re
 
 VERIFICATION_TOKEN = "my_super_secret_token_987"
 
@@ -74,11 +75,41 @@ async def receive_whatsapp(request: Request):
         initial_state = {
             "user_query": text,
             "query_response": "",
-            "evaluation_state": ""
+            "evaluation_state": "",
+            "retry_count": 0,
+            "instruction": ""
         }
         final_state = workflow.invoke(initial_state, config={"verbose": True})
         print(final_state)
-        answer = final_state["query_response"]
+        query_response = final_state["query_response"]
+        if "ValidationOutcome" in query_response:
+            # IMPROVED: More robust regex to handle escaped quotes and content until closing quote
+            # Captures content inside validated_output="...", handling escaped chars
+            pattern = r'validated_output="((?:[^"\\]|\\.)*)"'
+            match = re.search(pattern, query_response)
+            if match:
+                answer = match.group(1).replace('\\n', '\n').replace('\\"', '"').strip()  # Unescape and clean
+            else:
+                # FIXED: For fallback, use regex to extract validated_output specifically until the closing quote before the comma
+                fallback_pattern = r'validated_output=\'([^\']*)\'[, ]'
+                fallback_match = re.search(fallback_pattern, query_response)
+                if fallback_match:
+                    answer = fallback_match.group(1).replace('\\n', '\n').replace('\\"', '"').replace("\\'", "'").strip()
+                else:
+                    # Ultimate fallback: Manual split and slice up to the next comma after the value
+                    start_idx = query_response.find("validated_output='") + len("validated_output='")
+                    end_idx = query_response.find("',\n    reask=", start_idx)
+                    if end_idx != -1:
+                        raw_content = query_response[start_idx:end_idx]
+                        answer = raw_content.replace('\\n', '\n').replace('\\"', '"').replace("\\'", "'").strip()
+                    else:
+                        answer = "Error parsing validated output."
+        else:
+            # FIXED: For direct LLM responses, strip leading/trailing single quotes and whitespace
+            answer = query_response.replace("'","").strip().strip("'").strip()  # Remove ' at start/end, then extra whitespace
+        
+        # FINAL CLEANUP: Remove any trailing newlines or extra whitespace
+        answer = re.sub(r'\n+$', '', answer).strip()
     except Exception as e:
         print("Agent error:", e)
         answer = "⚠️ Oops, something went wrong. Please try again."

@@ -4,14 +4,14 @@ from pathlib import Path
 from abc import ABC, abstractmethod
 from langchain_experimental.text_splitter import SemanticChunker
 from sentence_transformers import SentenceTransformer
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from pinecone import Pinecone, ServerlessSpec
 
 current_file = Path(__file__).resolve()
 project_root = current_file.parent.parent.parent 
 sys.path.insert(0, str(project_root))
 
-from settings import GOOGLE_API_KEY, PINECONE_API_KEY, PINECONE_INDEX_NAME, PINECONE_REGION
+from settings import PINECONE_API_KEY, PINECONE_INDEX_NAME, PINECONE_REGION
 from src.document_loader.local_loader import get_combined_text
 
 class DocumentUploader(ABC):
@@ -20,9 +20,8 @@ class DocumentUploader(ABC):
         self.pc = Pinecone(api_key=PINECONE_API_KEY)
         self.index_name = PINECONE_INDEX_NAME
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-        self.semantic_chunker = GoogleGenerativeAIEmbeddings(
-            model="models/embedding-001", 
-            google_api_key=GOOGLE_API_KEY
+        self.semantic_chunker = HuggingFaceEmbeddings(
+            model_name="all-MiniLM-L6-v2"
         )
     
     @abstractmethod
